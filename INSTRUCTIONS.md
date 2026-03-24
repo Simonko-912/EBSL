@@ -38,6 +38,11 @@ RANDOMBIT x = sets bit number x to either 1 or 0 randomly
 FUNC x y z = makes function x, sets its start at x and end at z.
 <Function name> x y z = runs function and passes x y z, when in function you can set x y z's of the inst in the function to 'x' 'y' and 'z' to use the passed num/string from function.
 RETURN x = sets return to value x, x can be anything. you can use 'return' instead of a argument (instead of x y and z) to use the value from return.
+NUMTOCACHE x = saves the raw number (from bin to a number) to cache
+RESETCACHE = resets cache
+SETCACHE x = sets cache to x
+INC x = sets byte starting from x to x+7 to the previus byte plus one
+DEC x = same as INC just subtracts 1 instead
 BEEP = beep for 0.10 seconds (:
 ```
 
@@ -45,8 +50,9 @@ BEEP = beep for 0.10 seconds (:
 ## SYNTAX
 1. Please do not use spaces infront of instructions, it will not work.
 2. Please do not use comments in the same line as a instruction, it will not work. You can use the comments in its own line.
-3. 'x' 'y' and 'z' used outside of functions do not work. Only 'return' works outside a function as a variable.
+3. 'x' 'y' and 'z' used outside of functions do not work. Only 'return' and 'cache' works outside a function as a variable.
 4. Its not recomended to use HALT, NOP or DELAY as for debugging.
-5. For more info ask Simonko-912 on github to add syntax here.
+5. Tip: use cache to store numbers temp for arguments! You can use 'cache' as a argument for inst.
+6. For more info ask Simonko-912 on github to add syntax here.
 
 
