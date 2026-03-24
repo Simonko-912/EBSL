@@ -1,0 +1,5 @@
+FUNC INCBETTER 2 2
+ADD cache x y
+// Simple but effective, call with INCBETTER <how much to add> <byte starting from bit>
+INCBETTER 3 1
+// should add 3 to byte starting from bit 1
