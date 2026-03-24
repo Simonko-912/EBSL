@@ -1,7 +1,7 @@
 # EBSL
 EBSL (EasyByteScratchLang) is a programing language used to communicate with the 8 bit computer emu (v2 is the latest).
 For usage examples visit folders in all uppercase like 'BLINKY' and import (Right click on list) your Program.txt to the Program list.
-Check INSTRUCTIONS.md for all instructions and syntax. Curently there are 34 instructions.
+Check INSTRUCTIONS.md for all instructions and syntax. Curently there are 36 instructions.
 
 # Run EBSL
 Open the offline scratch editor and import emu-v2.sb3
