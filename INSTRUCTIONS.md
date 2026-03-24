@@ -1,5 +1,6 @@
 # The list of INSTRUCTIONS for EBSL
 
+```
 NOP = does nothing, small pause
 HALT = wait forever, for debuging
 DELAY x = waits x number of ms (one ms = 0.001 seconds)
@@ -19,6 +20,8 @@ CONDJUMP x y z = jumps if the bit z of ram is 1 to x else to y
 COPYRAM x y = copies the bit from y to x
 COPYRAMBYTE x y = copies the byte (x...x+7) to byte starting from y (y...y+7)
 CLEARRAMBYTE x = clear the byte starting from bit x to bit x+7
+INC x = changes byte starting from bit x to bit x+7 by 1.
+DEC x = same as INC, just subtracts 1.
 ADD x y z = adds number x to y and saves the byte from bit number z if the result is over 255 it jumps to 0
 SUB x y z = subtracts number y from x and saves the byte from bit number z  if the result is under 0 it jumps to 255
 COPYRAMTOSTOR x y = replaces bit x of storage with bit y of ram
@@ -36,6 +39,8 @@ FUNC x y z = makes function x, sets its start at x and end at z.
 <Function name> x y z = runs function and passes x y z, when in function you can set x y z's of the inst in the function to 'x' 'y' and 'z' to use the passed num/string from function.
 RETURN x = sets return to value x, x can be anything. you can use 'return' instead of a argument (instead of x y and z) to use the value from return.
 BEEP = beep for 0.10 seconds (:
+```
+
 
 ## SYNTAX
 1. Please do not use spaces infront of instructions, it will not work.
