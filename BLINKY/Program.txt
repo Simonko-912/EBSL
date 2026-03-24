@@ -1,0 +1,5 @@
+LEDON 1
+DELAY 100
+LEDOFF 1
+DELAY 100
+// On for 100ms and off for 100 ms

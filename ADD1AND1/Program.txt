@@ -1,0 +1,12 @@
+ADD 1 1 1
+SETLEDBYRAM 1 1
+SETLEDBYRAM 2 2
+SETLEDBYRAM 3 3
+SETLEDBYRAM 4 4
+SETLEDBYRAM 5 5
+SETLEDBYRAM 6 6
+SETLEDBYRAM 7 7
+SETLEDBYRAM 8 8
+// Sets the whole 8 bits to the 1 byte result, 1+1 should only show "10000000" (result of 1+1 in binary is 10 what you can see in the result)
+HALT
+// Finaly, after displaying wait forever 

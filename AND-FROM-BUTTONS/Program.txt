@@ -1,0 +1,5 @@
+SETRAMBYBUTTON 1
+SETRAMBYBUTTON 2
+AND 1 2 1
+SETLEDBYRAM 1
+// Both pressed, should show 1, one or none should show 0.
