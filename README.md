@@ -7,6 +7,7 @@ Check INSTRUCTIONS.md for all instructions and syntax. Curently there are 36 ins
 Open the offline scratch editor and import emu-v2.sb3
 Turn on turbo mode by clicking edit and you should see it in the dropdown.
 Now you can set any hz you want or run it at full speed!
+For latest updates go to https://scratch.mit.edu/projects/1287676122/
 
 # Deafult specs
 These are the default specs of the computer emu:
