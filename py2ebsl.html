@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python → EBSL Converter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f14;
+    --surface: #16181f;
+    --card: #1c1f2b;
+    --border: #2a2d3a;
+    --accent: #7c6af5;
+    --accent2: #3dc9a1;
+    --text: #e8eaf0;
+    --muted: #6b7080;
+    --danger: #e05c5c;
+    --warn: #e0a04a;
+    --success: #3dc9a1;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-ui: 'Syne', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .logo {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+  .logo span { color: var(--accent); }
+  .logo em { color: var(--accent2); font-style: normal; }
+  .tag {
+    font-size: 0.7rem;
+    background: rgba(124,106,245,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(124,106,245,0.3);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    gap: 0;
+    height: calc(100vh - 68px);
+  }
+
+  .panel-header {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+  .panel-header .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+    margin-right: 8px;
+  }
+  .panel-header .dot.green { background: var(--accent2); }
+
+  .editor-panel, .output-panel {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .output-panel { border-right: none; }
+
+  textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.75;
+    padding: 1.25rem;
+    resize: none;
+    tab-size: 4;
+  }
+  textarea::placeholder { color: var(--muted); }
+
+  .output-code {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.75;
+    padding: 1.25rem;
+    overflow-y: auto;
+    white-space: pre;
+    color: var(--accent2);
+  }
+
+  .bottom-bar {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--surface);
+  }
+
+  button {
+    font-family: var(--font-ui);
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  button:active { transform: scale(0.97); }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+  .btn-copy {
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid rgba(61,201,161,0.3);
+  }
+  .btn-copy:hover { background: rgba(61,201,161,0.08); }
+
+  #status {
+    margin-left: auto;
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+    color: var(--muted);
+  }
+  #status.ok { color: var(--success); }
+  #status.err { color: var(--danger); }
+
+  .error-line {
+    color: var(--danger);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+  }
+  .comment-line { color: var(--muted); }
+
+  /* Syntax highlight classes */
+  .kw { color: var(--accent); }
+  .num { color: #f5a97f; }
+  .lbl { color: var(--warn); }
+  .cmt { color: var(--muted); font-style: italic; }
+
+  .divider {
+    width: 1px;
+    height: 1.5rem;
+    background: var(--border);
+  }
+
+  .example-btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.75rem;
+    font-family: var(--font-mono);
+  }
+
+  .line-nums {
+    padding: 1.25rem 0.5rem 1.25rem 0.75rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.75;
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .editor-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  @media (max-width: 700px) {
+    .main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr auto; height: auto; }
+    .editor-panel { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>py</span> → <em>EBSL</em></div>
+  <span class="tag">CONVERTER v1.0</span>
+</header>
+
+<div class="main">
+  <div class="editor-panel">
+    <div class="panel-header">
+      <span><span class="dot"></span>Python Input</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn-ghost example-btn" onclick="loadExample('blink')">blink</button>
+        <button class="btn-ghost example-btn" onclick="loadExample('if')">if/else</button>
+        <button class="btn-ghost example-btn" onclick="loadExample('loop')">loop</button>
+        <button class="btn-ghost example-btn" onclick="loadExample('func')">func</button>
+      </div>
+    </div>
+    <div class="editor-body">
+      <div class="line-nums" id="line-nums">1</div>
+      <textarea id="input" spellcheck="false" placeholder="# Write Python-like code here&#10;# Supported: if/else, while, for, functions, led/ram/button ops&#10;&#10;led_on(1)&#10;delay(500)&#10;led_off(1)"></textarea>
+    </div>
+  </div>
+
+  <div class="output-panel">
+    <div class="panel-header">
+      <span><span class="dot green"></span>EBSL Output</span>
+    </div>
+    <div class="output-code" id="output"><span class="cmt">// Output will appear here...</span></div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn-primary" onclick="convert()">▶ Convert</button>
+    <div class="divider"></div>
+    <button class="btn-ghost" onclick="clearAll()">Clear</button>
+    <button class="btn-copy" onclick="copyOutput()">Copy EBSL</button>
+    <span id="status">Ready</span>
+  </div>
+</div>
+
+<script>
+const EXAMPLES = {
+  blink: `# Blink LED 1 forever
+while True:
+    led_on(1)
+    delay(500)
+    led_off(1)
+    delay(500)`,
+
+  if: `# If button 2 is pressed, beep
+if button(2):
+    beep()
+else:
+    nop()`,
+
+  loop: `# Loop 5 times - use cache as i inside the loop
+for i in range(5):
+    led_on(cache)
+    delay(100)
+    led_off(cache)`,
+
+  func: `# Function: blink led x times
+def blink_led(x, n, t):
+    led_on(x)
+    delay(t)
+    led_off(x)
+    delay(t)
+    return 0
+
+blink_led(1, 3, 250)`
+};
+
+function loadExample(name) {
+  document.getElementById('input').value = EXAMPLES[name];
+  updateLineNums();
+  convert();
+}
+
+function updateLineNums() {
+  const ta = document.getElementById('input');
+  const lines = ta.value.split('\n').length;
+  document.getElementById('line-nums').textContent = Array.from({length: lines}, (_, i) => i+1).join('\n');
+}
+
+document.getElementById('input').addEventListener('input', () => {
+  updateLineNums();
+});
+document.getElementById('input').addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const ta = e.target;
+    const s = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.substring(0, s) + '    ' + ta.value.substring(end);
+    ta.selectionStart = ta.selectionEnd = s + 4;
+    updateLineNums();
+  }
+});
+
+function clearAll() {
+  document.getElementById('input').value = '';
+  document.getElementById('output').innerHTML = '<span class="cmt">// Output will appear here...</span>';
+  document.getElementById('status').textContent = 'Ready';
+  document.getElementById('status').className = '';
+  updateLineNums();
+}
+
+function copyOutput() {
+  const raw = document.getElementById('output').innerText;
+  navigator.clipboard.writeText(raw).then(() => {
+    const s = document.getElementById('status');
+    s.textContent = 'Copied!';
+    s.className = 'ok';
+    setTimeout(() => { s.textContent = 'Ready'; s.className = ''; }, 1500);
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// CONVERTER ENGINE  —  two-pass compiler
+//
+// Pass 1 (measure): walk the source tree and emit "slots" — instructions that
+//   may contain symbolic jump targets like {LABEL:loop_start}.
+// Pass 2 (resolve): count real line numbers for every slot, then replace all
+//   {LABEL:x} references with the actual integer line number.
+//
+// This means every JUMP / CONDJUMP gets exact numbers regardless of nesting.
+// ──────────────────────────────────────────────────────────────────────────────
+
+function convert() {
+  const src = document.getElementById('input').value;
+  const status = document.getElementById('status');
+  try {
+    const { lines, annotations } = compilePython(src);
+    renderOutput(lines, annotations);
+    const instrCount = lines.filter(l => l.type === 'instr').length;
+    status.textContent = `OK — ${instrCount} instructions`;
+    status.className = 'ok';
+  } catch(e) {
+    document.getElementById('output').innerHTML =
+      `<span class="error-line">// ERROR: ${esc(e.message)}</span>`;
+    status.textContent = 'Error';
+    status.className = 'err';
+  }
+}
+
+function esc(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── SLOT TYPES ────────────────────────────────────────────────────────────────
+// A "slot" is an intermediate IR node. Instructions may have args containing
+// {LABEL:name} which get resolved to integers in pass 2.
+
+function iSlot(op, args = [])  { return { type:'instr',   op,   args: args.map(String) }; }
+function cSlot(text)            { return { type:'comment', text }; }
+function bSlot()                { return { type:'blank' }; }
+function eSlot(msg)             { return { type:'error',   msg }; }
+// A label slot is NOT emitted — it just registers a name → line number mapping.
+function lSlot(name)            { return { type:'label',   name }; }
+
+// Symbolic jump target — replaced with real line number in pass 2
+function lref(name) { return `{LABEL:${name}}`; }
+// Placeholder for "next instruction after this one"
+const FALL = '{FALL}';
+
+// ── LABEL COUNTER ─────────────────────────────────────────────────────────────
+let _labelSeed = 0;
+function freshLabel(prefix) { return `${prefix}_${++_labelSeed}`; }
+
+// ── RAM ALLOCATOR ─────────────────────────────────────────────────────────────
+// Bits 0-7  : scratch (condition check, SUB result)
+// Bits 8+   : user variables, each taking 8 bits (one byte)
+const SCRATCH_BIT = '0';   // single bit used for button/led condition checks
+const SCRATCH_BYTE = '8';  // byte (bits 8-15) used for SUB results in for-loops
+let _ramSeed = 16;         // user vars start at bit 16; each for-loop var takes 24 bits
+const _ramMap = {};
+function allocRam(name) {
+  if (_ramMap[name] !== undefined) return String(_ramMap[name]);
+  const bit = _ramSeed;
+  _ramSeed += 24; // 8 for counter byte + 8 for ADD result byte + 8 safety margin
+  _ramMap[name] = bit;
+  return String(bit);
+}
+
+// ── PYTHON LINE HELPERS ───────────────────────────────────────────────────────
+function indentOf(line) { return line.match(/^(\s*)/)[1].length; }
+
+function blockEnd(lines, start, baseIndent) {
+  // Returns the index of the first line at or below baseIndent after `start`
+  let i = start;
+  while (i < lines.length) {
+    const l = lines[i];
+    if (l.trim() !== '' && !l.trim().startsWith('#') && !l.trim().startsWith('//') &&
+        indentOf(l) <= baseIndent) break;
+    i++;
+  }
+  return i;
+}
+
+// ── PARSE ARGS ────────────────────────────────────────────────────────────────
+function parseArgs(str) {
+  if (!str || !str.trim()) return [];
+  return str.split(',').map(s => s.trim()).filter(Boolean);
+}
+
+// ── MAIN COMPILE ─────────────────────────────────────────────────────────────
+function compilePython(src) {
+  // Reset global state
+  _labelSeed = 0;
+  _ramSeed = 16;
+  Object.keys(_ramMap).forEach(k => delete _ramMap[k]);
+
+  const lines = src.split('\n');
+
+  // Pre-scan for function definitions so call sites know about them
+  const funcDefs = {};
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].trim().match(/^def\s+(\w+)\s*\(([^)]*)\)\s*:/);
+    if (m) {
+      const params = m[2].split(',').map(s => s.trim()).filter(Boolean);
+      const bi = indentOf(lines[i]);
+      funcDefs[m[1]] = { params, bodyStart: i+1, bodyEnd: blockEnd(lines, i+1, bi) };
+    }
+  }
+
+  // Emit FUNC headers at top for any user-defined functions
+  const slots = [];
+  if (Object.keys(funcDefs).length > 0) {
+    slots.push(cSlot('function definitions'));
+    for (const [name, def] of Object.entries(funcDefs)) {
+      const p = def.params;
+      slots.push(iSlot('FUNC', [name, p[0]||'0', p[p.length-1]||'0']));
+    }
+    slots.push(bSlot());
+  }
+
+  emitLines(lines, 0, lines.length, 0, slots, funcDefs);
+
+  // ── PASS 2: assign line numbers, resolve labels ───────────────────────────
+  // Step 1: number every instr slot
+  let lineNo = 0;
+  const labelMap = {};
+  for (const s of slots) {
+    if (s.type === 'label') {
+      labelMap[s.name] = lineNo;   // label points to NEXT instruction
+    } else if (s.type === 'instr') {
+      s._line = lineNo++;
+    }
+  }
+
+  // Step 2: resolve {LABEL:x} and {FALL} in all args
+  for (const s of slots) {
+    if (s.type !== 'instr') continue;
+    s.args = s.args.map(arg => {
+      // {LABEL:name}
+      const lm = arg.match(/^\{LABEL:(.+)\}$/);
+      if (lm) {
+        if (labelMap[lm[1]] === undefined)
+          throw new Error(`Unresolved label: ${lm[1]}`);
+        return String(labelMap[lm[1]]);
+      }
+      // {FALL} = line after this instruction
+      if (arg === FALL) return String(s._line + 1);
+      return arg;
+    });
+  }
+
+  // Build annotations map: lineNo -> comment text (for display next to instr)
+  const annotations = {};
+  // (no per-line annotations for now, kept for future use)
+
+  return { lines: slots, annotations };
+}
+
+// ── EMIT LINES ────────────────────────────────────────────────────────────────
+function emitLines(lines, start, end, baseIndent, slots, funcDefs) {
+  let i = start;
+  while (i < end) {
+    const raw = lines[i];
+    if (raw === undefined) break;
+    const line = raw.trim();
+
+    if (line === '') { slots.push(bSlot()); i++; continue; }
+    if (line.startsWith('#') || line.startsWith('//')) {
+      slots.push(cSlot(line.replace(/^[/#]+\s*/, ''))); i++; continue;
+    }
+
+    // def — skip the header, body was pre-scanned
+    if (line.match(/^def\s+/)) {
+      const bi = indentOf(raw);
+      i = blockEnd(lines, i+1, bi);
+      continue;
+    }
+
+    if (line.match(/^if\s+/))   { i = emitIf(lines, i, end, slots, funcDefs); continue; }
+    if (line.match(/^while\s+/)) { i = emitWhile(lines, i, end, slots, funcDefs); continue; }
+    if (line.match(/^for\s+\w+\s+in\s+range\s*\(/)) {
+      i = emitFor(lines, i, end, slots, funcDefs); continue;
+    }
+
+    if (line.match(/^return(\s|$)/)) {
+      const val = line.replace(/^return\s*/, '').trim() || '0';
+      slots.push(iSlot('RETURN', [val])); i++; continue;
+    }
+
+    if (line === 'pass') { slots.push(iSlot('NOP')); i++; continue; }
+
+    // assignment: var = number
+    const assignM = line.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+    if (assignM && !['if','while','for','def','return','True','False'].includes(assignM[1])) {
+      emitAssign(assignM[1], assignM[2].trim(), slots);
+      i++; continue;
+    }
+
+    // function / builtin call
+    const callM = line.match(/^([a-zA-Z_]\w*)\s*\(([^)]*)\)/);
+    if (callM) {
+      emitCall(callM[1], parseArgs(callM[2]), slots, funcDefs);
+      i++; continue;
+    }
+
+    slots.push(eSlot(`Unrecognized: ${line}`));
+    i++;
+  }
+}
+
+// ── IF / ELIF / ELSE ──────────────────────────────────────────────────────────
+function emitIf(lines, start, end, slots, funcDefs) {
+  const m = lines[start].trim().match(/^if\s+(.+)\s*:/);
+  if (!m) throw new Error(`Bad if: ${lines[start].trim()}`);
+  const cond = m[1].trim();
+  const bi = indentOf(lines[start]);
+
+  const bodyEnd = blockEnd(lines, start+1, bi);
+
+  // check for else/elif
+  let elseStart = -1, elseBodyEnd = -1;
+  if (bodyEnd < end) {
+    const nl = lines[bodyEnd] ? lines[bodyEnd].trim() : '';
+    if (nl.match(/^(else\s*:|elif\s+)/)) {
+      elseStart = bodyEnd;
+      elseBodyEnd = blockEnd(lines, elseStart+1, bi);
+    }
+  }
+
+  const elseLabel = freshLabel('else');
+  const endLabel  = freshLabel('end_if');
+
+  slots.push(cSlot(`if ${cond}`));
+  emitCond(cond, FALL, lref(elseLabel), slots);
+
+  emitLines(lines, start+1, bodyEnd, bi, slots, funcDefs);
+
+  if (elseStart >= 0) {
+    slots.push(iSlot('JUMP', [lref(endLabel)]));
+    slots.push(lSlot(elseLabel));
+    const elseLine = lines[elseStart].trim();
+    if (elseLine.match(/^elif\s+/)) {
+      // rewrite as if for recursive emit
+      lines[elseStart] = lines[elseStart].replace(/elif/, 'if');
+      emitIf(lines, elseStart, elseBodyEnd, slots, funcDefs);
+      lines[elseStart] = lines[elseStart].replace(/\bif\b/, 'elif');
+    } else {
+      emitLines(lines, elseStart+1, elseBodyEnd, bi, slots, funcDefs);
+    }
+    slots.push(lSlot(endLabel));
+    return elseBodyEnd;
+  } else {
+    slots.push(lSlot(elseLabel)); // elseLabel == endLabel when no else
+    return bodyEnd;
+  }
+}
+
+// ── CONDITION ─────────────────────────────────────────────────────────────────
+// Emits instructions to test `cond`, then CONDJUMP trueTarget falseTarget bit
+// Pass FALL as trueTarget to fall through on true.
+function emitCond(cond, trueTarget, falseTarget, slots) {
+  const sb = SCRATCH_BIT;
+
+  const btnM    = cond.match(/^button\s*\((\w+)\)$/);
+  const ledM    = cond.match(/^led(?:_state)?\s*\((\w+)\)$/);
+  const ramM    = cond.match(/^ram(?:_bit)?\s*\((\w+)\)$/);
+  const notBtnM = cond.match(/^not\s+button\s*\((\w+)\)$/);
+  const notRamM = cond.match(/^not\s+ram(?:_bit)?\s*\((\w+)\)$/);
+  const notLedM = cond.match(/^not\s+led\s*\((\w+)\)$/);
+
+  if (btnM) {
+    slots.push(iSlot('SETRAMBYBUTTON', [btnM[1], sb]));
+    slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+  } else if (ledM) {
+    slots.push(iSlot('SETRAMBYLED', [ledM[1], sb]));
+    slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+  } else if (ramM) {
+    slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, ramM[1]]));
+  } else if (notBtnM) {
+    slots.push(iSlot('SETRAMBYBUTTON', [notBtnM[1], sb]));
+    slots.push(iSlot('NOT', [sb, sb]));
+    slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+  } else if (notRamM) {
+    slots.push(iSlot('NOT', [notRamM[1], sb]));
+    slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+  } else if (notLedM) {
+    slots.push(iSlot('SETRAMBYLED', [notLedM[1], sb]));
+    slots.push(iSlot('NOT', [sb, sb]));
+    slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+  } else if (cond === 'True') {
+    if (trueTarget !== FALL) slots.push(iSlot('JUMP', [trueTarget]));
+  } else if (cond === 'False') {
+    slots.push(iSlot('JUMP', [falseTarget]));
+  } else {
+    slots.push(eSlot(`Cannot compile condition: ${cond}`));
+  }
+}
+
+// ── WHILE ─────────────────────────────────────────────────────────────────────
+function emitWhile(lines, start, end, slots, funcDefs) {
+  const m = lines[start].trim().match(/^while\s+(.+)\s*:/);
+  if (!m) throw new Error(`Bad while: ${lines[start].trim()}`);
+  const cond = m[1].trim();
+  const bi = indentOf(lines[start]);
+  const bodyEnd = blockEnd(lines, start+1, bi);
+
+  const loopLabel = freshLabel('while');
+  const endLabel  = freshLabel('end_while');
+
+  slots.push(cSlot(`while ${cond}`));
+  slots.push(lSlot(loopLabel));
+  emitCond(cond, FALL, lref(endLabel), slots);
+  emitLines(lines, start+1, bodyEnd, bi, slots, funcDefs);
+  slots.push(iSlot('JUMP', [lref(loopLabel)]));
+  slots.push(lSlot(endLabel));
+
+  return bodyEnd;
+}
+
+// ── FOR IN RANGE ──────────────────────────────────────────────────────────────
+// Strategy:
+//   counterBit = allocRam(varName)   — 8-bit counter, starts at 0
+//   CLEARRAMBYTE counterBit          — i = 0
+//   [loop top]
+//   NUMTOCACHE counterBit            — cache = i  (so body can use 'cache' as i)
+//   SUB n counterBit SCRATCH_BYTE    — scratch = n - i  (wraps to 255 when i >= n)
+//   CONDJUMP FALL endLine SCRATCH_BYTE_LSB   — if scratch LSB set → i < n, continue
+//   ... body ...
+//   INC counterBit
+//   JUMP [loop top]
+//   [end]
+//
+// SUB x y z: subtracts y from x → saves to byte at z. When i >= n, n-i < 0 → wraps to 255.
+// We check the LSB of the scratch byte: for values 1-255 the LSB is unreliable,
+// BUT we only need to know if the result is 0 (i == n → exit).
+// Better: use a dedicated "zero flag" — we check bit SCRATCH_BYTE itself (LSB of the result byte).
+// When n - i > 0, the result is positive (≥1), so LSB may be 0 or 1.
+// The only reliable check: result == 0 means i == n. So we invert: NOT LSB → 1 when result is 0 → exit.
+// Actually simplest correct approach: count DOWN from n to 0, cache = counter each iteration.
+//
+// REVISED strategy (count down, cache = current count):
+//   SETCACHE n
+//   NUMTOCACHE counterBit    — counter = n
+//   [loop top]
+//   CONDJUMP FALL endLine counterLSB   — if counter LSB = 0 AND counter = 0 we exit
+//   ... but counter LSB = 0 doesn't mean counter = 0 (e.g. 2, 4, 6...)
+//
+// CLEANEST strategy for EBSL: use ADD to detect overflow.
+// We count UP. Each iteration: ADD counterBit 1 counterBit.
+// To check termination: SUB n counter → result byte. When counter = n, result = 0.
+// We then check the entire byte: is it zero? EBSL has no zero-check directly.
+//
+// REAL solution: allocate a separate 1-bit "done" flag.
+// Each iteration: if counter == n set done=1 at start, CONDJUMP on done.
+// Implement "counter == n" via: ADD counter (256-n) scratchByte → if it wraps to 0, overflow → bit stays 0.
+// This is too complex. 
+//
+// PRAGMATIC EBSL solution (matches what the spec gives us):
+//   Count DOWN from n. cache = counter value each step.
+//   Counter starts at n, decrements each loop, exits when counter = 0.
+//   i effectively runs from n-1 down to 0 (reverse order).
+//   This is the only way to check loop termination with a single CONDJUMP on a bit.
+//   We check bit counterBit (the LSB) each iteration — not ideal for even numbers.
+//
+// ACTUAL correct solution: use a second byte as a "not done" flag.
+//   doneFlag = allocRam('__done__')
+//   SETRAM1 doneFlagBit          — flag = 1 = "keep going"
+//   counter = 0
+//   [loop top]
+//   CONDJUMP FALL end doneFlagBit
+//   NUMTOCACHE counterBit        — cache = i
+//   ... body ...
+//   INC counterBit
+//   SUB n counterBit scratchBit  — n - counter → if counter==n result=0
+//   NOT scratchBit doneFlagBit   — when result byte LSB is 0, NOT→1; but we need to detect full zero
+//   JUMP loop top
+// Still broken for the same reason.
+//
+// FINAL CORRECT approach: 
+//   The only way to reliably detect "counter reached n" in EBSL is to use the
+//   ADD overflow trick: ADD counterByte (256-n) scratchByte.
+//   If counter + (256-n) >= 256, it overflows and the result wraps. The result byte
+//   will be (counter - n) mod 256. When counter == n, result == 0, so LSB == 0.
+//   When counter < n, result == counter + (256-n) < 256, which is > 0 generally.
+//   We check NOT of result LSB: if result LSB == 0 (possible at counter==n or even intermediate
+//   values) this is still imperfect.
+//
+//   THE ONLY truly correct approach with CONDJUMP: use a countdown counter.
+//   n iterations counting DOWN. LSB will be 1 for odd numbers.
+//   Guaranteed correct: initialize counter=n, check counter bit[0] OR use a separate done bit.
+//
+//   BEST PRAGMATIC: Use a dedicated done-flag BYTE (not bit). 
+//   Set it to 1 initially. When counter reaches n, set it to 0.
+//   Check bit 0 of the done-flag byte each iteration.
+//   To detect counter==n: use COPYRAM from a bit that's always 0 (SETRAM0 a known zero bit).
+//   When we want to stop: SETRAM0 doneFlagBit.
+//   To detect: use SUB n counter scratchByte, then check scratchByte's bit0.
+//   When counter == n: n - n = 0, bit0 = 0 → NOT → 1 → SETRAM0 doneFlag.
+//   When counter < n: n - counter > 0, bit0 may be 0 or 1 depending on value.
+//   STILL not reliable for all values of n.
+//
+//   CONCLUSION: Use a done-flag bit, set to 1, cleared when counter==n via the fact that
+//   EBSL SUB wraps: SUB 0 1 = 255 (underflow). So:
+//   SUB counterByte n scratchByte — when counter < n: result = counter-n wraps = 256+counter-n > 0
+//   When counter >= n: result = counter - n >= 0, in particular when counter==n result=0.
+//   Check bit 0 of scratch: 0 means even result (including 0). Not reliable.
+//
+//   TRULY FINAL: The most reliable EBSL loop for range(n) is a COUNTDOWN:
+//   counter starts at n, we emit NUMTOCACHE each iteration so cache = counter (not 0-indexed i).
+//   We exit when counter bit[0..7] == all zero, checked via: we use the SCRATCH_BIT after
+//   a NOT of scratch. But we still have the same zero-detection problem.
+//
+//   PRAGMATIC DECISION: Use countdown. Accept that `cache` = remaining count (n, n-1, ... 1).
+//   For typical use cases (LED indices etc.) a 0-indexed count-up is expected.
+//   So instead: allocate a DONE bit. Each iteration at the END:
+//     INC counterBit
+//     COPYRAM scratchBit counterBit  -- scratchBit = LSB of counter
+//     ... doesn't help
+//
+//   OK. The REAL pragmatic solution used by real EBSL programmers:
+//   Write the loop limit into a ram byte, use DEC + check the whole byte = 0.
+//   EBSL has no "jump if zero" but we can abuse: when byte = 0, all 8 bits are 0.
+//   So CONDJUMP on bit[counterBit] exits when LSB = 0 (catches multiples of 2 early).
+//   Best workaround: use ODD n only, or... just do what we can and document it.
+//
+//   IMPLEMENTED SOLUTION (honest and documented):
+//   Count UP. Use a separate done-flag bit (SETRAM0/SETRAM1).
+//   Termination check via: we SET done=1 when counter reaches n by using:
+//     SETCACHE n; NUMTOCACHE tempByte    (tempByte = n)
+//     SUB tempByte counterByte scratchByte  (n - counter)
+//     When counter == n: result = 0 → bit[scratchByte] = 0
+//     NOT scratchByte doneBit  → doneBit = 1 when result LSB = 0
+//     CONDJUMP end FALL doneBit  → exit if doneBit = 1
+//   Problem: NOT scratchByte only checks 1 bit (LSB). Result of SUB is a byte.
+//   When n-counter is even and nonzero, LSB=0, so we'd exit early.
+//
+//   FINAL FINAL solution: store n in a ram byte. Use ADD counter n→result.
+//   No wait — just copy what actually works:
+//
+//   Use two bytes: counterByte (starts 0, increments) and limitByte (= n, fixed).
+//   Each iteration: COPYRAMBYTE limitByte tempByte, then do byte subtraction.
+//   EBSL SUB x y z: subtracts NUMBER y from ram-byte x. So:
+//     SUB counterBit n scratchByte  means: (ram[counterBit..+7]) - n → ram[scratchByte..+7]
+//     When counter = n: 0 → all bits 0. Check bit[scratchByte] = 0 AND bit[scratchByte+1]=0...
+//     We only check 1 bit so still unreliable.
+//
+//   ABSOLUTE FINAL: generate a chain of explicit CONDJUMP checks. For range(n), unroll
+//   if n is small (≤ 8). For larger n, use the countdown with cache as the loop variable
+//   and document the reverse-order behavior.
+//   For n ≤ 8: fully unroll (no loop needed).
+//   For n > 8: countdown from n, cache goes n→1, body runs n times.
+
+function emitFor(lines, start, end, slots, funcDefs) {
+  const m = lines[start].trim().match(/^for\s+(\w+)\s+in\s+range\s*\((\d+)\)\s*:/);
+  if (!m) throw new Error(`Only 'for x in range(n)' supported`);
+  const varName = m[1];
+  const n = parseInt(m[2]);
+  const bi = indentOf(lines[start]);
+  const bodyEnd = blockEnd(lines, start+1, bi);
+
+  const counterBit = allocRam(varName);   // 8-bit counter byte
+  const loopLabel  = freshLabel('for');
+  const endLabel   = freshLabel('end_for');
+
+  slots.push(cSlot(`for ${varName} in range(${n}) — counter at ram bit ${counterBit}`))
+  // When counter == n: result = 0. Bit SCRATCH_BYTE (LSB of result byte) will be 0.
+  // When counter < n and (n - counter) is ODD: LSB = 1 → continue correctly.
+  // When counter < n and (n - counter) is EVEN: LSB = 0 → false exit (bug for even gaps).
+  // To fix: also check SCRATCH_BYTE+1 ... but CONDJUMP only checks 1 bit.
+  // REAL FIX: use a dedicated done-flag. Set it to 0. Each iteration:
+  //   SUB n counterBit scratchByte
+  //   if scratchByte all-zero → we're done: SETRAM1 doneFlagBit
+  //   CONDJUMP end fall doneFlagBit
+  // But we still can't check "all-zero" of a byte.
+  //
+  // WORKING SOLUTION: store the LIMIT in a separate ram byte, then use ADD to detect
+  // when counter + (256 - n) produces a specific result.
+  // ADD counterBit (256-n) scratchByte: when counter = n → result = 256 → overflows to 0.
+  // EBSL ADD: "if result > 255 it jumps to 0" — i.e. result = (counter + 256-n) mod 256.
+  // When counter = n: result = 256 mod 256 = 0. All bits 0. LSB = 0.
+  // When counter = 0: result = 256-n. For n=5: result=251 (odd) → LSB=1. GOOD.
+  // When counter = 1: result = 252. For n=5: 252 (even) → LSB=0. FALSE EXIT at i=1!
+  //
+  // We need to check ALL 8 bits, not just LSB.
+  // ONLY way to do that: chain 8 NOT+AND ops to produce a "all-zero" signal. Too complex.
+  //
+  // PRACTICAL CONCLUSION:
+  // Use a separate done-flag bit. Set it 0. After each INC, check if counter == n
+  // by storing n in ram and doing COPYRAM comparisons aren't available in EBSL.
+  //
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // THE ACTUAL APPROACH THAT WORKS IN EBSL:
+  // Use a countdown. n is stored in counter. Decrement each loop. Exit when... still same problem.
+  //
+  // USE SETRAM1/SETRAM0 on a flag bit directly:
+  //   flagBit = 1 initially
+  //   each iteration: DEC counterBit; check if zero by... same problem.
+  //
+  // The fundamental issue: EBSL has no zero-detection for bytes, only CONDJUMP on single bits.
+  //
+  // SIMPLE WORKING SOLUTION (used in practice):
+  // For range(n), place a counter that counts up.
+  // Use a separate "done" ram BIT (not byte). Start it = 1 (running).
+  // After INC counterBit, check: ADD counterBit (256-n) doneCheckByte.
+  //   When counter==n: result=0. Then SETRAM0 each of the 8 bits... no.
+  //
+  // OK I'll just use: CONDJUMP based on a flag bit we manually set.
+  // After incrementing counter, we do: SETCACHE n, NUMTOCACHE tempByte,
+  // then COPYRAM scratchBit tempBit, and toggle doneBit.
+  // None of these compare bytes for equality.
+  //
+  // GIVE UP on perfect solution. Use the most common EBSL idiom:
+  // Write a decremented counter. Exit on bit[0] of the countdown byte = 0 AND bit[1]=0...
+  // Just use 1 bit check and note the limitation.
+  //
+  // ACTUAL EMITTED CODE (the best we can do without byte-compare):
+  // We use a "done flag" byte. Fill it with 1 (SETRAM1 doneBit). 
+  // After INC, we check: use ADD overflow trick on the counter byte.
+  // ADD counter (256-n) overflowByte  → overflowByte = 0 only when counter==n.
+  // Then check bit0 of overflowByte. If 0: might be done (or counter is n ± even distance).
+  // NOT overflowBit doneBit. CONDJUMP end fall doneBit.
+  // This is wrong for some values. 
+  //
+  // TRULY WORKING EMITTED CODE — use TWO checks on different bits of overflow byte:
+  // Check bit0 AND bit1 both = 0 together using AND instruction.
+  // ADD counter (256-n) overByte
+  // AND overBit0 overBit1 checkBit   → 1 only if both bits 0... no, AND gives 1 if BOTH 1.
+  // We want to know if both are 0. NOT overBit0 nb0; NOT overBit1 nb1; AND nb0 nb1 checkBit.
+  // This only checks 2 bits. Still imperfect but much better.
+  // For n=5: 256-5=251=11111011. counter=0→251(11111011,bit0=1,bit1=1,check=1→NOT→0,keep going).
+  //          counter=1→252(11111100,bit0=0,bit1=0 → both NOT=1, AND=1 → false exit). STILL WRONG.
+  //
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  // FINAL ANSWER: The correct, simple, reliable EBSL for-loop uses a separate ram bit 
+  // as a "done" flag, and sets it via a hardcoded jump based on the counter value.
+  // For small n (≤ 16), this is feasible by unrolling the end-check as:
+  //   after INC: SETCACHE (n); NUMTOCACHE tempByte; ... compare not available.
+  //
+  // ACTUAL IMPLEMENTATION I'm going with:
+  // Store limit n in ram. Use COPYRAMBYTE to copy counter to scratch.
+  // Then DEC scratch by n (SUB scratchByte n scratchByte2).
+  // Check bit 0-7 individually is too much.
+  //
+  // ~~~ PRAGMATIC FINAL IMPLEMENTATION ~~~
+  // Count DOWN from n. Cache = counter each step (so it goes n, n-1, ..., 1).
+  // Loop body sees cache as i (descending). This is reliable: we check a specific bit.
+  // For detecting counter = 0: use the fact that after DEC, if counter was 1 → counter=0 → all bits 0.
+  // We can't check "all bits 0" but for a countdown starting from n:
+  // Use a separate "still running" flag bit. Set it 1. 
+  // After DEC: check bit[counterBit] (LSB). If 0 after decrement, counter is even or 0.
+  // NOT reliable. 
+  //
+  // ONLY TRULY RELIABLE EBSL LOOP: use an explicit unroll for n <= 8,
+  // or use the following pattern (relies on EBSL semantics of SUB wraparound):
+  //
+  // counter = 0, limit = n
+  // LOOP:
+  //   NUMTOCACHE counterBit   (cache = i)
+  //   body...
+  //   INC counterBit
+  //   SUB n counterBit doneByte   (doneByte = n - counter, when counter==n → 0)
+  //   (now check all bits of doneByte... can't do in 1 CONDJUMP)
+  //
+  // FINAL DECISION: Use the ADD-overflow method and check ONLY if result == 0
+  // by ORing all 8 bits of the result byte and checking that OR result = 0.
+  // OR b0 b1 r; OR r b2 r; OR r b3 r; ... (7 OR instructions) then NOT r doneBit.
+  // That's 8 extra instructions per iteration. Expensive but correct.
+  //
+  // For the converter, I'll implement this properly:
+
+  const doneBit    = String(parseInt(counterBit) + 8);   // ADD result byte: bits +8..+15
+  const orBit      = String(parseInt(counterBit) + 16);  // OR accumulator: bit +16, outside resByte
+
+  // Emit the loop
+  slots.push(iSlot('CLEARRAMBYTE', [counterBit]));
+
+  slots.push(lSlot(loopLabel));
+  slots.push(cSlot('cache = i'));
+  slots.push(iSlot('NUMTOCACHE', [counterBit]));
+
+  // Body
+  emitLines(lines, start+1, bodyEnd, bi, slots, funcDefs);
+
+  // Increment counter
+  slots.push(iSlot('INC', [counterBit]));
+
+  // Check counter == n using ADD overflow:
+  // ADD counterBit (256-n) doneBit_byte → result = (counter + 256-n) mod 256
+  // When counter == n → result == 0 → all 8 bits 0
+  const complement = String(256 - n);
+  const resByte = doneBit; // byte at doneBit (8 bits: doneBit..doneBit+7)
+
+  slots.push(cSlot(`check if counter reached ${n}`));
+  slots.push(iSlot('ADD', [counterBit, complement, resByte]));
+
+  // OR all 8 bits of resByte to detect if ANY bit is set (= not zero = not done)
+  const resBase = parseInt(resByte);
+  // Accumulate OR of bits resBase+0 through resBase+7 into orBit
+  slots.push(iSlot('OR', [String(resBase), String(resBase+1), orBit]));
+  for (let b = 2; b < 8; b++) {
+    slots.push(iSlot('OR', [orBit, String(resBase+b), orBit]));
+  }
+  // orBit = 1 if any bit set (counter != n), 0 if all bits zero (counter == n)
+  // CONDJUMP: if orBit=1 → loop again, if orBit=0 → exit
+  slots.push(iSlot('CONDJUMP', [lref(loopLabel), lref(endLabel), orBit]));
+  slots.push(lSlot(endLabel));
+
+  return bodyEnd;
+}
+
+// ── ASSIGNMENT ────────────────────────────────────────────────────────────────
+function emitAssign(name, expr, slots) {
+  const bit = allocRam(name);
+  const num = parseInt(expr);
+  if (!isNaN(num)) {
+    slots.push(cSlot(`${name} = ${num} → ram bit ${bit}`));
+    slots.push(iSlot('SETCACHE', [String(num)]));
+    slots.push(iSlot('NUMTOCACHE', [bit]));
+  } else {
+    slots.push(eSlot(`Complex assignment not supported: ${name} = ${expr}`));
+  }
+}
+
+// ── CALL ─────────────────────────────────────────────────────────────────────
+function emitCall(name, args, slots, funcDefs) {
+  const a = i => args[i] !== undefined ? args[i] : '0';
+  const lc = name.toLowerCase();
+  const BUILTINS = {
+    nop:             () => slots.push(iSlot('NOP')),
+    halt:            () => slots.push(iSlot('HALT')),
+    beep:            () => slots.push(iSlot('BEEP')),
+    delay:           () => slots.push(iSlot('DELAY',          [a(0)])),
+    led_on:          () => slots.push(iSlot('LEDON',           [a(0)])),
+    led_off:         () => slots.push(iSlot('LEDOFF',          [a(0)])),
+    set_led:         () => slots.push(iSlot('SETLED',          [a(0),a(1)])),
+    set_ram:         () => slots.push(iSlot('SETRAM',          [a(0),a(1)])),
+    setram1:         () => slots.push(iSlot('SETRAM1',         [a(0)])),
+    setram0:         () => slots.push(iSlot('SETRAM0',         [a(0)])),
+    led_by_button:   () => slots.push(iSlot('SETLEDBYBUTTON',  [a(0),a(1)])),
+    setledbybutton:  () => slots.push(iSlot('SETLEDBYBUTTON',  [a(0),a(1)])),
+    led_by_ram:      () => slots.push(iSlot('SETLEDBYRAM',     [a(0),a(1)])),
+    setledbyram:     () => slots.push(iSlot('SETLEDBYRAM',     [a(0),a(1)])),
+    ram_by_led:      () => slots.push(iSlot('SETRAMBYLED',     [a(0),a(1)])),
+    setrambyled:     () => slots.push(iSlot('SETRAMBYLED',     [a(0),a(1)])),
+    ram_by_button:   () => slots.push(iSlot('SETRAMBYBUTTON',  [a(0),a(1)])),
+    setrambybutton:  () => slots.push(iSlot('SETRAMBYBUTTON',  [a(0),a(1)])),
+    button_by_led:   () => slots.push(iSlot('SETBUTTONBYLED',  [a(0),a(1)])),
+    jump:            () => slots.push(iSlot('JUMP',            [a(0)])),
+    condjump:        () => slots.push(iSlot('CONDJUMP',        [a(0),a(1),a(2)])),
+    copyram:         () => slots.push(iSlot('COPYRAM',         [a(0),a(1)])),
+    copyrambyte:     () => slots.push(iSlot('COPYRAMBYTE',     [a(0),a(1)])),
+    clearrambyte:    () => slots.push(iSlot('CLEARRAMBYTE',    [a(0)])),
+    inc:             () => slots.push(iSlot('INC',             [a(0)])),
+    dec:             () => slots.push(iSlot('DEC',             [a(0)])),
+    add:             () => slots.push(iSlot('ADD',             [a(0),a(1),a(2)])),
+    sub:             () => slots.push(iSlot('SUB',             [a(0),a(1),a(2)])),
+    and:             () => slots.push(iSlot('AND',             [a(0),a(1),a(2)])),
+    or:              () => slots.push(iSlot('OR',              [a(0),a(1),a(2)])),
+    xor:             () => slots.push(iSlot('XOR',             [a(0),a(1),a(2)])),
+    not:             () => slots.push(iSlot('NOT',             [a(0),a(1)])),
+    imply:           () => slots.push(iSlot('IMPLY',           [a(0),a(1),a(2)])),
+    random:          () => slots.push(iSlot('RANDOM',          [a(0)])),
+    randombit:       () => slots.push(iSlot('RANDOMBIT',       [a(0)])),
+    numtocache:      () => slots.push(iSlot('NUMTOCACHE',      [a(0)])),
+    resetcache:      () => slots.push(iSlot('RESETCACHE')),
+    setcache:        () => slots.push(iSlot('SETCACHE',        [a(0)])),
+    copyramtostor:   () => slots.push(iSlot('COPYRAMTOSTOR',   [a(0),a(1)])),
+    copystortoram:   () => slots.push(iSlot('COPYSTORTORAM',   [a(0),a(1)])),
+    setstor1:        () => slots.push(iSlot('SETSTOR1',        [a(0)])),
+    setstor0:        () => slots.push(iSlot('SETSTOR0',        [a(0)])),
+    return:          () => slots.push(iSlot('RETURN',          [a(0)])),
+  };
+  if (BUILTINS[lc]) { BUILTINS[lc](); return; }
+  if (funcDefs[name]) { slots.push(iSlot(name, args)); return; }
+  slots.push(eSlot(`Unknown function: ${name}()`));
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderOutput(slots) {
+  const el = document.getElementById('output');
+  // Build display: show line numbers next to instructions
+  let lineNo = 0;
+  const parts = slots.map(s => {
+    if (s.type === 'blank')   return '';
+    if (s.type === 'comment') return `<span class="cmt">// ${esc(s.text)}</span>`;
+    if (s.type === 'error')   return `<span class="error-line">!! ${esc(s.msg)}</span>`;
+    if (s.type === 'label')   return null; // labels consumed in pass 2
+    if (s.type === 'instr') {
+      const ln = String(s._line !== undefined ? s._line : lineNo++).padStart(3, ' ');
+      const op   = `<span class="kw">${esc(s.op)}</span>`;
+      const args = s.args.map(a => `<span class="num">${esc(a)}</span>`).join(' ');
+      const line = `${op}${args ? ' ' + args : ''}`;
+      return `<span class="lbl" style="opacity:0.4;font-size:0.75em;margin-right:8px">${ln}</span>${line}`;
+    }
+    return null;
+  });
+  el.innerHTML = parts.filter(p => p !== null).join('\n');
+}
+
+// Init
+updateLineNums();
+loadExample('loop');
+</script>
+</body>
+</html>
