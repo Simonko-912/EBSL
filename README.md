@@ -29,3 +29,5 @@ RETURN Ok
 
 This code automaticly loops, you can use HALT to stop it or use JUMPs (and CONDJUMPs).
 
+### Py2EBSL
+Theres a html app in this repo called py2ebsl.html basicly you can convert basic python to ebsl.
