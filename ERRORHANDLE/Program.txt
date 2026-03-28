@@ -5,6 +5,10 @@ CONDJUMP 5 6 1
 RETURN 1
 BEEP
 RETURN 0
+
+// Run if else 
+EXAMPLE-ERROR
+
 // RETURNs cant have spaces but can have strings, You can use returns as arguments, but most instructions only support numbers
 SETLED 1 return
 // saves return value to led
