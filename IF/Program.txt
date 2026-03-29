@@ -3,6 +3,16 @@ SETRAMBYBUTTON x 1
 // We set ram bit 1 to button x's state
 CONDJUMP y z 1
 
-IF 1 7 1 
+IF 1 7 8
 BEEP
-// BEEP ONLY IF BUTTON  ON (THE CODE LOOPS SINCE WE DIDNT ADD A HALT OR JUMP AT THE END)
+JUMP 1
+// Jump to line 1 to skip these comments below
+
+// Explanation:
+// We make a function called if, we set the start to line 2 and end to line 4. Then we set the ram bit 1 to the button x's state, x is the first argument, y second etc.
+// X, y, z can be used in instructions only if they are in functions, then you have to set those arguments when running the function.
+// We jump to line y if bit 1 is 1, else to z
+// Then (we are outside the function now) we run the function with arguments 1, 7 and 8. Thats tells the function jump to 7 if the button is on, else jump to 8.
+
+// Expected behavior:
+// If you press the button, the code will forever beep, when you turn the button off, it will stop beeping
