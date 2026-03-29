@@ -1,0 +1,12 @@
+INPUT
+EQUALS cache 1 1
+// Is the user input equal to 1, save result to bit 1
+CONDJUMP 5 7 1
+BEEP
+HALT
+LEDON 1
+DELAY 200
+LEDOFF 1
+DELAY 200
+JUMP 7
+// If bit 1 is 1, beeps and halts, else jumps to a forever blinking led loop
