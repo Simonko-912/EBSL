@@ -1,10 +1,13 @@
-SETRAM1 1
-// Turn me into "SETRAM0 1" to test.
-FUNC EXAMPLE-ERROR 4 7
-CONDJUMP 5 6 1
+SETRAM 1 1
+SETLED 1 0
+// Turn me into "SETRAM 1 0" to test.
+FUNC EXAMPLE-ERROR 5 10
+CONDJUMP 6 9 1
 RETURN 1
 BEEP
+JUMP 14
 RETURN 0
+JUMP 14
 
 // Run if else 
 EXAMPLE-ERROR
@@ -12,3 +15,18 @@ EXAMPLE-ERROR
 // RETURNs cant have spaces but can have strings, You can use returns as arguments, but most instructions only support numbers
 SETLED 1 return
 // saves return value to led
+
+JUMP 1
+// Jump so we skip the following comments.
+
+// Explanation:
+// First we set ram bit 1 to 1, then we make a function called 'EXAMPLE-ERROR' starting from line 5 and ending on line 10.
+// In the function, if bit 1 is 1, we jump to line 6, else we jump to line 9.
+// In the first portion we return 1 and beep then leave the function, in the second we return 0 and leave the function.
+// Then (we are no longer in the function) we run the function what gives us our return based off the bit 1 = 1 or being 0.
+// We set the led number 1 to the return value, as we set the return to either 0 or 1 the led will light up acordingly
+// Note: Returns do not stop the code, they set a variable and you can do some things before manualy jumping to the line you want
+
+// Expected behavior:
+// Without changing anything we should get a beep and the led should light up, if we change the value of ram bit 1 to 0
+// we will get no beep and the led will be off.
