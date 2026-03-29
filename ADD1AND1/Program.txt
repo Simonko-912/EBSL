@@ -7,6 +7,17 @@ SETLEDBYRAM 5 5
 SETLEDBYRAM 6 6
 SETLEDBYRAM 7 7
 SETLEDBYRAM 8 8
-// Sets the whole 8 bits to the 1 byte result, 1+1 should only show "10000000" (result of 1+1 in binary is 10 what you can see in the result)
+// Sets the whole 8 bits to the 1 byte result, 1+1 should only show "00000010" (result of 1+1 in binary is 10 what you can see in the result)
 HALT
 // Finaly, after displaying wait forever 
+
+// Explanation:
+// We add 1 to 1 and save the result to bits from 1-8, then we show those bits using the corosponding leds 
+// (bit one with led one, etc.) then we wait forever.
+
+// Expected behavior: 
+// Should show "00000010", zero being off, and one being on
+
+// You can also use the console instead by first initializing the console using 'CONSON', and then using printing to show the value.
+// You also need to use 'NUMTOCACHE 1' to store the value from add before using 'PRINT cache'
+// Note: NUMTOCACHE automaticly turns bin to numbers, so you will see a raw number
