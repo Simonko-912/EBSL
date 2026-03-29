@@ -303,14 +303,18 @@ print(You-typed:)
 print(cache)
 consoff()`,
 
-  compare: `# Compare two values using equals/larger/smaller
-setbyte(0, 42)
-setbyte(8, 42)
-equals(cache, cache, 16)
-if ram_bit(16):
+  compare: `# Compare values with ==, !=, >, <, >=, <=
+# if 5 == 5: turn led 1 on
+if 5 == 5:
     led_on(1)
 else:
-    led_off(1)`
+    led_off(1)
+# if 3 > 10: beep (wont fire)
+if 3 > 10:
+    beep()
+# if 7 != 3: beep (will fire)
+if 7 != 3:
+    beep()`
 };
 
 function loadExample(name) {
@@ -574,6 +578,15 @@ function emitIf(lines, start, end, slots, funcDefs) {
 // ── CONDITION ─────────────────────────────────────────────────────────────────
 // Emit instructions to test `cond`, then CONDJUMP trueTarget falseTarget bit.
 // Pass FALL as trueTarget to fall through on true.
+//
+// Supported condition forms:
+//   button(x)          led(x) / led_state(x)    ram_bit(x)
+//   not button(x)      not led(x)               not ram_bit(x)
+//   A == B             A > B                    A < B
+//   A != B             A >= B                   A <= B
+//   True / False
+//
+// A and B can be: a plain number (0-255), 'cache', or ram_bit(x) / getbyte(x)
 function emitCond(cond, trueTarget, falseTarget, slots) {
   const sb = SCRATCH_BIT;
 
@@ -583,6 +596,10 @@ function emitCond(cond, trueTarget, falseTarget, slots) {
   const notBtnM = cond.match(/^not\s+button\s*\((\w+)\)$/);
   const notRamM = cond.match(/^not\s+ram(?:_bit)?\s*\((\w+)\)$/);
   const notLedM = cond.match(/^not\s+led\s*\((\w+)\)$/);
+
+  // Comparison: A == B, A != B, A > B, A < B, A >= B, A <= B
+  // A/B can be: number, cache, getbyte(rambit), ram_bit(x) [treated as single bit 0/1]
+  const cmpM = cond.match(/^(.+?)\s*(==|!=|>=|<=|>|<)\s*(.+)$/);
 
   if (btnM) {
     slots.push(iSlot('SETRAMBYBUTTON', [btnM[1], sb]));
@@ -603,12 +620,98 @@ function emitCond(cond, trueTarget, falseTarget, slots) {
     slots.push(iSlot('SETRAMBYLED', [notLedM[1], sb]));
     slots.push(iSlot('NOT', [sb, sb]));
     slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+  } else if (cmpM) {
+    // Resolve each operand into something EQUALS/LARGER/SMALLER can use.
+    // EQUALS x y z: if x == y → bit z = 1. x and y can be numbers or 'cache'.
+    // We load operands into cache as needed.
+    const lhs = cmpM[1].trim();
+    const op  = cmpM[2];
+    const rhs = cmpM[3].trim();
+
+    // Helper: emit instructions so that 'cache' holds the value of operand v,
+    // OR return v unchanged if it's already a plain number or 'cache'.
+    // For getbyte(x) → emit GETBYTE x, then the argument is 'cache'.
+    // For ram_bit(x) → emit NUMTOCACHE x (raw bit value to cache).
+    function resolveOperand(v) {
+      const gbM = v.match(/^getbyte\s*\((\w+)\)$/i);
+      const rbM = v.match(/^ram(?:_bit)?\s*\((\w+)\)$/i);
+      if (gbM) { slots.push(iSlot('GETBYTE', [gbM[1]])); return 'cache'; }
+      if (rbM) { slots.push(iSlot('NUMTOCACHE', [rbM[1]])); return 'cache'; }
+      // plain number or 'cache' — pass through
+      return v;
+    }
+
+    // We need both operands available simultaneously for the comparison instruction.
+    // Strategy: resolve lhs first into cache if needed, then resolve rhs.
+    // If both need cache, we store lhs in scratch byte first via SETBYTE.
+    let L = resolveOperand(lhs);
+    // If lhs resolved to 'cache' and rhs also needs resolving (not a plain number),
+    // save cache → scratch byte so rhs can use cache.
+    const rhsNeedsCache = rhs.match(/^getbyte\s*\(/i) || rhs.match(/^ram(?:_bit)?\s*\(/i);
+    if (L === 'cache' && rhsNeedsCache) {
+      slots.push(iSlot('SETBYTE', [SCRATCH_BIT2, 'cache'])); // store L in scratch
+      // Now resolve rhs (will put result in cache)
+      resolveOperand(rhs);
+      // swap: we need lhs in L-arg and rhs in R-arg for the instruction
+      // Use SCRATCH_BIT2 as lhs, cache as rhs
+      // EQUALS/LARGER/SMALLER x y z: x and y are values (number or 'cache')
+      // Problem: we can't pass a ram-byte as x directly — only 'cache' or a number.
+      // Workaround: flip operands and flip the operator for LARGER/SMALLER.
+      L = 'cache'; // rhs is now in cache
+      const flipped = { '>': '<', '<': '>', '>=': '<=', '<=': '>=', '==': '==', '!=': '!=' };
+      emitComparison(flipped[op] || op, SCRATCH_BIT2, L, sb, trueTarget, falseTarget, slots);
+      return;
+    }
+
+    const R = resolveOperand(rhs);
+    emitComparison(op, L, R, sb, trueTarget, falseTarget, slots);
   } else if (cond === 'True') {
     if (trueTarget !== FALL) slots.push(iSlot('JUMP', [trueTarget]));
   } else if (cond === 'False') {
     slots.push(iSlot('JUMP', [falseTarget]));
   } else {
     slots.push(eSlot(`Cannot compile condition: ${cond}`));
+  }
+}
+
+// Emit the comparison instruction(s) for op(L, R) → CONDJUMP on result bit sb.
+// L and R are either plain numbers, 'cache', or ram bit strings.
+function emitComparison(op, L, R, sb, trueTarget, falseTarget, slots) {
+  const sb2 = SCRATCH_BIT2; // second scratch bit for compound ops (!=, >=, <=)
+  switch (op) {
+    case '==':
+      slots.push(iSlot('EQUALS',  [L, R, sb]));
+      slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+      break;
+    case '!=':
+      slots.push(iSlot('EQUALS',  [L, R, sb]));
+      slots.push(iSlot('NOT',     [sb, sb]));
+      slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+      break;
+    case '>':
+      slots.push(iSlot('LARGER',  [L, R, sb]));
+      slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+      break;
+    case '<':
+      slots.push(iSlot('SMALLER', [L, R, sb]));
+      slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+      break;
+    case '>=':
+      // L >= R  ≡  L > R  OR  L == R
+      slots.push(iSlot('LARGER',  [L, R, sb]));
+      slots.push(iSlot('EQUALS',  [L, R, sb2]));
+      slots.push(iSlot('OR',      [sb, sb2, sb]));
+      slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+      break;
+    case '<=':
+      // L <= R  ≡  L < R  OR  L == R
+      slots.push(iSlot('SMALLER', [L, R, sb]));
+      slots.push(iSlot('EQUALS',  [L, R, sb2]));
+      slots.push(iSlot('OR',      [sb, sb2, sb]));
+      slots.push(iSlot('CONDJUMP', [trueTarget, falseTarget, sb]));
+      break;
+    default:
+      slots.push(eSlot(`Unknown comparison operator: ${op}`));
   }
 }
 
