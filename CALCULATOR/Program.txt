@@ -3,16 +3,18 @@ PRINT NUM-1
 INPUT
 SETBYTE 1 cache
 // save cache to byte starting from 1-8
+PRINT cache
 PRINT NUM-2
 INPUT
 SETBYTE 9 cache
+PRINT cache
 // save cache to byte starting from 9-16
 
 INPUT
 SETRAM 17 cache
 // lets say 1 = add 0 = subtract
 PRINT RESULT:
-CONDJUMP 17 23 17
+CONDJUMP 19 25 17
 
 // add the first number to the second number, save num to bits 18-25
 ADD 1 9 18
@@ -33,7 +35,7 @@ JUMP 1
 // 18-25 Result
 
 // How the condjump works:
-// If bit 17 is 1 (add) then it will jump to the add portion (on line 17 theres the comment about add)
-// The same with 0 (subtract) it will jump to the subtrach portion (on line 23 there is a comment about subtract)
+// If bit 17 is 1 (add) then it will jump to the add portion (on line 19 theres the comment about add)
+// The same with 0 (subtract) it will jump to the subtrach portion (on line 25 there is a comment about subtract)
 // The "JUMP 1" at the end of each portion will jump to the start, basicly like a 'while True' loop, and also skips the other portion 
 // (else it will for example add first and then subtract)
