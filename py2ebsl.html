@@ -207,6 +207,8 @@
     user-select: none;
     border-right: 1px solid var(--border);
     overflow: hidden;
+    white-space: pre;
+    flex-shrink: 0;
   }
 
   .editor-body {
@@ -330,6 +332,9 @@ function updateLineNums() {
 }
 
 document.getElementById('input').addEventListener('input', () => { updateLineNums(); });
+document.getElementById('input').addEventListener('scroll', () => {
+  document.getElementById('line-nums').scrollTop = document.getElementById('input').scrollTop;
+});
 document.getElementById('input').addEventListener('keydown', (e) => {
   if (e.key === 'Tab') {
     e.preventDefault();
