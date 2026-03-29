@@ -43,6 +43,21 @@ RESETCACHE = resets cache
 SETCACHE x = sets cache to x
 INC x = sets byte starting from x to x+7 to the previus byte plus one
 DEC x = same as INC just subtracts 1 instead
+CONSON = show console
+CONSOFF = hide console
+CONSCLEAR = clear console
+CONSREPLACE x y = replaces item number x in console with y
+PRINT x = adds x to console
+CONSTOCACHE x = saves item number x to cache
+CONSNUMTOCACHE x = saves number of item x in console to cache
+CONSLENTOCACHE = saves length of the entire console list to cache
+CONSHAS x y = if console has x, saves 1 to bit y, else saves a 0
+INPUT = requests user input and when user finishes saves it to cache
+EQUALS x y z = if x is equal to y (x=y) saves 1 to z, else saves a 0
+LARGER x y z = if x is larger than y (x>y) saves 1 to z, else saves a 0
+SMALLER x y z = if x is smaller than y (x<y) saves 1 to z, else saves a 0
+SETBYTE x y = saves number y (0-255) to byte starting from bit x
+GETBYTE x = saves number from bit x to x+7 (from bin to a normal number) into cache
 BEEP = beep for 0.10 seconds (:
 ```
 
@@ -53,6 +68,8 @@ BEEP = beep for 0.10 seconds (:
 3. 'x' 'y' and 'z' used outside of functions do not work. Only 'return' and 'cache' works outside a function as a variable.
 4. Its not recomended to use HALT, NOP or DELAY as for debugging.
 5. Tip: use cache to store numbers temp for arguments! You can use 'cache' as a argument for inst.
-6. For more info ask Simonko-912 on github to add syntax here.
+6. Console allways shows above leds, you can imagine the console like a serial interface.
+7. A argument can not have spaces. This is wrong `PRINT Hello world!`, this is right `PRINT Hello-world!`.
+8. For more info ask Simonko-912 on github to add syntax here.
 
 
