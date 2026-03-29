@@ -1,5 +1,11 @@
-SETRAMBYBUTTON 1
-SETRAMBYBUTTON 2
-AND 1 2 1
-SETLEDBYRAM 1
+SETRAMBYBUTTON 1 1
+SETRAMBYBUTTON 2 2
+AND 1 2 3
+SETLEDBYRAM 3
+JUMP 1
 // Both pressed, should show 1, one or none should show 0.
+// "JUMP 1" so it skips this code block (slight performace gain)
+// Ram map:
+// 1 Button 1
+// 2 Button 2
+// 3 AND gate result
