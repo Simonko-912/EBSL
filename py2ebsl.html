@@ -795,12 +795,8 @@ function emitFor(lines, start, end, slots, funcDefs) {
 function emitAssign(name, expr, slots) {
   // Special case: x = input() — capture input into a named ram byte
   if (expr === 'input()') {
-    const bit = allocRam(name);
-    slots.push(cSlot(`${name} = input() → stored in cache, ram bit ${bit}`));
+    slots.push(cSlot(`${name} = input() → result is in cache`));
     slots.push(iSlot('INPUT'));
-    // cache now holds the input string; user accesses it via 'cache'
-    // We can't store a string in ram bits directly — note that limitation
-    slots.push(cSlot(`Note: input stored in cache only, not copyable to ram bits`));
     return;
   }
 
