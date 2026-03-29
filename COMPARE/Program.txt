@@ -10,3 +10,12 @@ LEDOFF 1
 DELAY 200
 JUMP 7
 // If bit 1 is 1, beeps and halts, else jumps to a forever blinking led loop
+
+// Explanation:
+// We compare the cache to the built in value, you can replace the 1 to anything, 
+// just not the second 1, second 1 is the ram adress (example: "EQUALS cache example-value 1")
+// After we compare and save the comparision value, we run CONDJUMP, CONDJUMP jumps to the line 5 if the bit number 1 is
+// 1, else it jumps to line 7, 5 is the line for beep, and 7 is the ledon loop.
+
+// Expected behavior:
+// If the user inputs 1, the device should beep and halt, if the user inputs something diffrent, it will run a led blinking loop
