@@ -65,7 +65,7 @@ SMALLER x y z = if x is smaller than y (x<y) saves 1 to z, else saves a 0
 FUNC x y z = makes function x, sets its start at x and end at z.
 <Function name> x y z = runs function and passes x y z, when in function you can set x y z's of the inst in the function to 'x' 'y' and 'z' to use the passed num/string from function.
 RETURN x = sets return to value x, x can be anything. you can use 'return' instead of a argument (instead of x y and z) to use the value from return.
-NUMTOCACHE x = saves the raw number (from bin to a number) to cache
+NUMTOCACHE x = saves the raw number (from bits x to x+7, from bin to a number) to cache
 RESETCACHE = resets cache
 SETCACHE x = sets cache to x
 ```
