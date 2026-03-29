@@ -9,6 +9,7 @@ Turn on turbo mode by clicking edit and you should see it in the dropdown.
 Now you can set any hz you want or run it at full speed!
 For latest updates go to https://scratch.mit.edu/projects/1287676122/
 
+[Turbo warp link with recomended settings (60fps, turbo)](https://turbowarp.org/1287676122?fps=60&turbo)
 # Deafult specs
 These are the default specs of the computer emu:
 1. 60 hz cpu (full speed on turbo mode)
