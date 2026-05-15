@@ -13,6 +13,7 @@ BEEP = beep for 0.10 seconds (:
 ```
 LEDON x = turns the led number x on
 LEDOFF x = turns the led number x off
+TOGLED x = turns the led x off if its alredy on, if its off, it turns it on
 SETLED x y = sets led x to y (y can be 1 or 0)
 SETLEDBYBUTTON x y = sets the led y to the button x's state
 SETLEDBYRAM x y = sets the led y to the ram's bit x state
@@ -21,6 +22,7 @@ SETLEDBYRAM x y = sets the led y to the ram's bit x state
 ```
 SETRAM1 x = sets the bit x in ram to 1
 SETRAM0 x = sets the bit x in ram to 0
+TOGRAM x = sets the bit x in ram to 0 if its alredy 1, if its 0, turns it into a 1 (Basicly a toggle)
 SETRAM x y = sets ram bit x to y (y can be 1 or 0)
 SETRAMBYLED x y = sets the ram's bit y to the led number x state.
 SETRAMBYBUTTON x y = sets the ram's bit y to the button number x state.
