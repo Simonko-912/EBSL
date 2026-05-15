@@ -16,6 +16,8 @@ LEDOFF x = turns the led number x off
 SETLED x y = sets led x to y (y can be 1 or 0)
 SETLEDBYBUTTON x y = sets the led y to the button x's state
 SETLEDBYRAM x y = sets the led y to the ram's bit x state
+PWMLED x y = turn a led on and off for a specific brightness, x is the led, y is strength from 0 to 100 INDEV
+PWMLEDOFF x = turn the pwm led off INDEV
 ```
 ### RAM and button / led states
 ```
