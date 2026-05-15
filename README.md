@@ -32,3 +32,4 @@ This code automaticly loops, you can use HALT to stop it or use JUMPs (and CONDJ
 
 ### Py2EBSL
 Theres a html app in this repo called py2ebsl.html basicly you can convert basic python to ebsl.
+[Py2EBSL](https://simonko-912.github.io/EBSL/py2ebsl.html)
