@@ -1,0 +1,3 @@
+TOGLED 1
+DELAY 100
+// Toggles the led on, waits 100ms, then it toggles it off, waits, toggles on, etc.
