@@ -18,17 +18,40 @@ These are the default specs of the computer emu:
 4. 18 buttons total. (range 1-18)
 5. 12x5 LED display (range 1-60)
 
-# Example of EBSL
-This is the most basic example of EBSL, for more look in the folders titled what programs they are.
+# Examples of EBSL
+These are the most basic examples of EBSL, for more look in the folders titled what programs they are.
 ```
 LEDON 1
 DELAY 200
 LEDOFF 1
 RETURN Ok
-
+HALT
+// Turns led 1 on, then waits 200ms, then turns it off, then sets RETURN (aka as the program status, can be used for diffrent things too, and isnt needed) then waits forever
 ```
+```
+INPUT
+EQUALS cache 1 1
+// Is the user input equal to 1, save result to bit 1
+CONDJUMP 5 7 1
+BEEP
+HALT
+LEDON 1
+DELAY 200
+LEDOFF 1
+DELAY 200
+JUMP 7
+// If bit 1 is 1, beeps and halts, else jumps to a forever blinking led loop
 
-This code automaticly loops, you can use HALT to stop it or use JUMPs (and CONDJUMPs).
+// Explanation:
+// We compare the cache to the built in value, you can replace the 1 to anything, 
+// just not the second 1, second 1 is the ram adress (example: "EQUALS cache example-value 1")
+// After we compare and save the comparision value, we run CONDJUMP, CONDJUMP jumps to the line 5 if the bit number 1 is
+// 1, else it jumps to line 7, 5 is the line for beep, and 7 is the ledon loop.
+
+// Expected behavior:
+// If the user inputs 1, the device should beep and halt, if the user inputs something diffrent, it will run a led blinking loop
+```
+Code automaticly loops, you can use HALT to stop it or use JUMPs (and CONDJUMPs).
 
 ### Py2EBSL
 Theres a html app in this repo called py2ebsl.html basicly you can convert basic python to ebsl.
