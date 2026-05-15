@@ -1,10 +1,10 @@
 CONSON
-PRINT NUM-1
+PRINTLN NUM-1:
 INPUT
 SETBYTE 1 cache
 // save cache to byte starting from 1-8
 PRINT cache
-PRINT NUM-2
+PRINTLN NUM-2:
 INPUT
 SETBYTE 9 cache
 PRINT cache
@@ -13,7 +13,7 @@ PRINT cache
 INPUT
 SETRAM 17 cache
 // lets say 1 = add 0 = subtract
-PRINT RESULT:
+PRINTLN RESULT:
 CONDJUMP 19 25 17
 
 // add the first number to the second number, save num to bits 18-25
