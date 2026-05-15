@@ -78,7 +78,9 @@ CONSON = show console
 CONSOFF = hide console
 CONSCLEAR = clear console
 CONSREPLACE x y = replaces item number x in console with y
-PRINT x = adds x to console
+PRINTLN x = adds x to console
+PRINT x = changes the current line (adds text in x)
+NEWLN = adds a new empty line
 CONSTOCACHE x = saves item number x to cache
 CONSNUMTOCACHE x = saves number of item x in console to cache
 CONSLENTOCACHE = saves length of the entire console list to cache
@@ -91,10 +93,10 @@ INPUT = requests user input and when user finishes saves it to cache
 1. Please do not use spaces infront of instructions, it will not work.
 2. Please do not use comments in the same line as a instruction, it will not work. You can use the comments in its own line.
 3. 'x' 'y' and 'z' used outside of functions do not work. Only 'return' and 'cache' works outside a function as a variable.
-4. Its not recomended to use HALT, NOP or DELAY as for debugging.
+4. Its recomended to use HALT, NOP or DELAY as for debugging.
 5. Tip: use cache to store numbers temp for arguments! You can use 'cache' as a argument for inst.
 6. Console allways shows above leds, you can imagine the console like a serial interface.
-7. A argument can not have spaces. This is wrong `PRINT Hello world!`, this is right `PRINT Hello-world!`.
+7. A argument can not have spaces. This is wrong `PRINTLN Hello world!`, this is right `PRINTLN Hello-world!` or `NEWLN` then `PRINT Hello` and then do `PRINT world!`
 8. All things like ram, buttons, lines of code, leds etc start from 1, not from 0.
 9. For more info ask Simonko-912 on github to add syntax here.
 
