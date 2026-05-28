@@ -5,9 +5,9 @@ INC y // Change num on y by 1
 INC 9 // We make a temp number at byte 2 to keep track of the change
 NUMTOCACHE 9 // We save my temp number to cache
 EQUALS x cache 18 // We use the value 18 to save the state of the operation
-SMALLER x cache 19 // If x is smaller than cache, something is very wrong
-CONDJUMP 12 4 18 // Jump to 12 (escape) if bit 1 = 1, else loop
-CONDJUMP 12 4 19 // Check if the number goes too high
+SMALLER x cache 19 // If x is smaller than cache, something is very wrong, x < cache (aka too many inc operations happened)
+CONDJUMP 12 10 18 // Jump to 12 (escape) if bit 18 = 1, else loop
+CONDJUMP 12 4 19 // Check if the number goes too high, if bit 19 is 1 jump to 12, else 4 to loop 
 
 
 // Note: we only escape if we go beyond the borders of the function (end defined as 8), we can normaly jump around in the function.
