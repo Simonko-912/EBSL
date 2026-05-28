@@ -1,4 +1,4 @@
-FUNC ADD_INC 2 8
+FUNC ADD_INC 2 9
 NUMTOCACHE y // save current num to cache
 RETURN cache // we use this to store another value even if its ment for something else
 INC y // Change num on y by 1
