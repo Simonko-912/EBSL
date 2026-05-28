@@ -1,7 +1,7 @@
 // =========================
 // FULL ADDER DEFINITION
 // =========================
-FUNC FULL_ADDER 2 9
+FUNC FULL_ADDER 5 13
 SETRAM 1 x
 SETRAM 2 y
 SETRAM 3 z
