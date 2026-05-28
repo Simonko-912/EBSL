@@ -1,0 +1,11 @@
+FUNC FULL_ADDER 2 9
+SETRAM 1 x
+SETRAM 2 y
+SETRAM 3 z
+XOR 1 2 4
+AND 1 2 5
+XOR 4 3 6
+AND 4 3 7
+OR 5 7 8
+
+// Inputs: 1, 2, 3 or command arguments x, y z. Outputs: 6 is S, 8 is Cout
