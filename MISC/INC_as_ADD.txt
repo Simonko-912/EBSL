@@ -13,3 +13,4 @@ CONDJUMP 12 4 19 // Check if the number goes too high, if bit 19 is 1 jump to 12
 // Note: we only escape if we go beyond the borders of the function (end defined as 8), we can normaly jump around in the function.
 // Do not use the bits 9-19, they are reserved for this function.
 // Usage: "ADD_INC [ammount to add] [number adress in bits]", number adress is for byte 1 1, for byte 2, 9 etc.
+// NOT WORKING RIGHT NOW, STILL IN DEV
