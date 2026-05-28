@@ -1,13 +1,15 @@
-FUNC ADD_INC 2 9
+FUNC ADD_INC 2 10
 NUMTOCACHE y // save current num to cache
 RETURN cache // we use this to store another value even if its ment for something else
 INC y // Change num on y by 1
 INC 9 // We make a temp number at byte 2 to keep track of the change
 NUMTOCACHE 9 // We save my temp number to cache
 EQUALS x cache 18 // We use the value 18 to save the state of the operation
-SMALLER x cache 18 // If x is smaller than cache, something is very wrong
-CONDJUMP 10 4 18 // Jump to 9 (escape) if bit 1 = 1, else loop
+SMALLER x cache 19 // If x is smaller than cache, something is very wrong
+CONDJUMP 12 4 18 // Jump to 12 (escape) if bit 1 = 1, else loop
+CONDJUMP 12 4 19 // Check if the number goes too high
+
 
 // Note: we only escape if we go beyond the borders of the function (end defined as 8), we can normaly jump around in the function.
-// Do not use the bits 9-18, they are reserved for this function.
+// Do not use the bits 9-19, they are reserved for this function.
 // Usage: "ADD_INC [ammount to add] [number adress in bits]", number adress is for byte 1 1, for byte 2, 9 etc.
