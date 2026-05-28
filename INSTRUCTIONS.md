@@ -70,6 +70,7 @@ RETURN x = sets return to value x, x can be anything. you can use 'return' inste
 NUMTOCACHE x = saves the raw number (from bits x to x+7, from bin to a number) to cache
 RESETCACHE = resets cache
 SETCACHE x = sets cache to x
+BINTOCACHE x = converts the raw binary string to a number
 ```
 
 ## Console and input related
