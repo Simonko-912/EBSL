@@ -87,6 +87,7 @@ CONSNUMTOCACHE x = saves number of item x in console to cache
 CONSLENTOCACHE = saves length of the entire console list to cache
 CONSHAS x y = if console has x, saves 1 to bit y, else saves a 0
 INPUT = requests user input and when user finishes saves it to cache
+PRINTSPC = changes the current line (adds a space)
 ```
 
 
